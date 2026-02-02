@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jax Dashboard - Epitome</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg: #0a0a0a;
+            --card: #141414;
+            --border: #2a2a2a;
+            --text: #ffffff;
+            --text-secondary: #888;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--green);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--green);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .card h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .metric {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .metric.green .metric-value { color: var(--green); }
+        .metric.blue .metric-value { color: var(--blue); }
+        .metric.yellow .metric-value { color: var(--yellow); }
+        .metric.purple .metric-value { color: var(--purple); }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .tag.running { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        .tag.progress { background: rgba(234, 179, 8, 0.2); color: var(--yellow); }
+        .tag.waiting { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+        .tag.done { background: rgba(59, 130, 246, 0.2); color: var(--blue); }
+        .tag.idea { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+        
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .quick-links a:hover {
+            border-color: var(--blue);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .updated {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Jax Dashboard</h1>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Online
+            </div>
+        </header>
+        
+        <div class="metric-grid">
+            <div class="metric green">
+                <div class="metric-value">13</div>
+                <div class="metric-label">Tasks Done</div>
+            </div>
+            <div class="metric blue">
+                <div class="metric-value">2</div>
+                <div class="metric-label">Active Automations</div>
+            </div>
+            <div class="metric yellow">
+                <div class="metric-value">3</div>
+                <div class="metric-label">In Progress</div>
+            </div>
+            <div class="metric purple">
+                <div class="metric-value">7</div>
+                <div class="metric-label">Backlog</div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>🔄 Active Automations</h2>
+                <table>
+                    <tr>
+                        <th>Automation</th>
+                        <th>Schedule</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>Morning Brief</td>
+                        <td>8am daily</td>
+                        <td><span class="tag running">Running</span></td>
+                    </tr>
+                    <tr>
+                        <td>IG DM Check</td>
+                        <td>9am, 1pm, 6pm, 10pm</td>
+                        <td><span class="tag running">Running</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>🚧 In Progress</h2>
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>Taiwan Slides Presentation</td>
+                        <td><span class="tag progress">Building</span></td>
+                    </tr>
+                    <tr>
+                        <td>PDF Quotation Export</td>
+                        <td><span class="tag waiting">Need: Sample PDF</span></td>
+                    </tr>
+                    <tr>
+                        <td>Team Workload Visibility</td>
+                        <td><span class="tag waiting">Need: ClickUp</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card" style="margin-bottom: 20px;">
+            <h2>✅ Recently Completed</h2>
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td>Instagram access setup (@jax.epitome)</td>
+                    <td>2 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Project Costing Calculator v2</td>
+                    <td>2 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Calculator Apple redesign + logo</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Competitor analysis (6 companies)</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Investment portfolio tracking</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>ICP Framework documented</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Taiwan trip itinerary (7D6N)</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>Taiwan Google Sheet</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+                <tr>
+                    <td>GitHub deployment setup</td>
+                    <td>3 Feb</td>
+                    <td><span class="tag done">Done</span></td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>📋 Backlog (Waiting on Jasper)</h2>
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Need</th>
+                    </tr>
+                    <tr>
+                        <td>PDF export for calculator</td>
+                        <td>Sample PDF + T&Cs</td>
+                    </tr>
+                    <tr>
+                        <td>Proposal automation</td>
+                        <td>Canva decks + PDOs</td>
+                    </tr>
+                    <tr>
+                        <td>Retainer targeting</td>
+                        <td>Client list</td>
+                    </tr>
+                    <tr>
+                        <td>ClickUp integration</td>
+                        <td>API key / walkthrough</td>
+                    </tr>
+                    <tr>
+                        <td>Xero automation</td>
+                        <td>API key</td>
+                    </tr>
+                    <tr>
+                        <td>HubSpot integration</td>
+                        <td>API key</td>
+                    </tr>
+                    <tr>
+                        <td>Canva access</td>
+                        <td>Brand kit</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>💡 Ideas Pipeline</h2>
+                <table>
+                    <tr>
+                        <th>Idea</th>
+                        <th>Priority</th>
+                    </tr>
+                    <tr>
+                        <td>GeBIZ tender alerts</td>
+                        <td><span class="tag" style="background: rgba(239,68,68,0.2); color: #ef4444;">High</span></td>
+                    </tr>
+                    <tr>
+                        <td>Competitor social monitoring</td>
+                        <td><span class="tag" style="background: rgba(234,179,8,0.2); color: #eab308;">Medium</span></td>
+                    </tr>
+                    <tr>
+                        <td>LinkedIn content drafts</td>
+                        <td><span class="tag" style="background: rgba(234,179,8,0.2); color: #eab308;">Medium</span></td>
+                    </tr>
+                    <tr>
+                        <td>Gym accountability</td>
+                        <td><span class="tag" style="background: rgba(34,197,94,0.2); color: #22c55e;">Low</span></td>
+                    </tr>
+                    <tr>
+                        <td>Weekly portfolio snapshot</td>
+                        <td><span class="tag" style="background: rgba(34,197,94,0.2); color: #22c55e;">Low</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>🔗 Quick Links</h2>
+            <div class="quick-links">
+                <a href="https://jaxepitome.github.io/epitome-calculator/" target="_blank">📊 Project Calculator</a>
+                <a href="https://docs.google.com/spreadsheets/d/13ka3FtLpIOwbRDGCTHPU7Rh0_Fjda1uVGGrzNa6EJt0/edit" target="_blank">🗓️ Taiwan Itinerary</a>
+                <a href="https://www.instagram.com/jax.epitome/" target="_blank">📸 Jax Instagram</a>
+            </div>
+        </div>
+        
+        <p class="updated">Last updated: 3 Feb 2026, 3:30am SGT</p>
+    </div>
+</body>
+</html>
